@@ -1,0 +1,2032 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#121619">
+    <title>SpendTracker - Usability Test Demo</title>
+
+    <!-- PWA Meta Tags -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="mobile-web-app-capable" content="yes">
+
+    <!-- Satoshi Font -->
+    <link href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,600,700,900&display=swap" rel="stylesheet">
+
+    <!-- Feather Icons -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/feather-icons/4.29.0/feather.min.js"></script>
+
+    <!-- Canvas Confetti for celebrations -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+            -webkit-touch-callout: none;
+        }
+
+        body {
+            font-family: 'Satoshi', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #E5E7EB;
+            min-height: 100vh;
+            min-height: -webkit-fill-available;
+            color: #333;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            height: -webkit-fill-available;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 16px;
+            padding-top: env(safe-area-inset-top, 20px);
+            padding-bottom: calc(80px + env(safe-area-inset-bottom)) !important;
+            min-height: 100vh;
+        }
+
+        @supports (padding: max(0px)) {
+            .container {
+                padding-top: max(20px, env(safe-area-inset-top, 20px));
+                padding-left: max(16px, env(safe-area-inset-left));
+                padding-right: max(16px, env(safe-area-inset-right));
+            }
+        }
+
+        .app-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0 16px 0;
+            margin-bottom: 16px;
+        }
+
+        .app-title h1 {
+            color: #121619;
+            font-size: 26px;
+            font-weight: 900;
+            margin: 0;
+            letter-spacing: -0.5px;
+        }
+
+        @media (min-width: 481px) {
+            .app-title h1 {
+                font-size: 32px;
+            }
+        }
+
+        .app-tagline {
+            color: #666;
+            font-size: 14px;
+            margin: 4px 0 0 0;
+            font-weight: 400;
+        }
+
+        .header-settings-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            background: white;
+            border: 1px solid #e5e7eb;
+            color: #121619;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+            flex-shrink: 0;
+            font-size: 20px;
+        }
+
+        .header-settings-btn:hover {
+            transform: scale(1.05);
+            background: #f8f9fa;
+        }
+
+        .header {
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+        }
+
+        .stat-card {
+            background: #121619;
+            color: white;
+            padding: 12px 8px;
+            border-radius: 12px;
+            text-align: center;
+        }
+
+        @media (min-width: 481px) {
+            .stat-card {
+                padding: 15px;
+                border-radius: 15px;
+            }
+        }
+
+        .stat-label {
+            font-size: 11px;
+            opacity: 0.9;
+            margin-bottom: 5px;
+        }
+
+        .stat-value {
+            font-size: 16px;
+            font-weight: bold;
+            word-break: break-all;
+        }
+
+        .upload-section {
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+            overflow: hidden;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 20px;
+            background: white;
+            padding: 8px;
+            border-radius: 20px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+        }
+
+        .tab {
+            flex: 1;
+            padding: 10px 8px;
+            background: #f3f4f6;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s;
+            font-family: 'Satoshi', sans-serif;
+            font-size: 14px;
+        }
+        .view-toggle {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+    padding: 5px;
+    background: #f8f9fa;
+    border-radius: 10px;
+}
+
+.view-btn {
+    flex: 1;
+    padding: 8px;
+    background: transparent;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.3s;
+    font-family: 'Satoshi', sans-serif;
+    color: #666;
+}
+
+.view-btn.active {
+    background: white;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    color: #121619;
+}
+
+        .tab.active {
+            background: #121619;
+            color: white;
+        }
+
+        .transactions-list {
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+        }
+
+        .category-group {
+            margin-bottom: 20px;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .category-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            background: #f8f9fa;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .category-header:hover {
+            background: #f0f1f3;
+        }
+
+        .category-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .category-icon {
+            font-size: 24px;
+        }
+
+        .category-name {
+            font-weight: 600;
+            color: #121619;
+        }
+
+        .category-total {
+            font-weight: 700;
+            color: #dc2626;
+            font-size: 16px;
+        }
+
+        .category-items {
+            display: none;
+            background: white;
+        }
+
+        .category-items.expanded {
+            display: block;
+        }
+
+        .transaction-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px;
+            border-top: 1px solid #f3f4f6;
+        }
+
+        .transaction-merchant {
+            font-weight: 600;
+            margin-bottom: 5px;
+            font-size: 14px;
+        }
+
+        .transaction-date {
+            font-size: 11px;
+            color: #666;
+        }
+
+        .transaction-amount {
+            font-size: 14px;
+            font-weight: bold;
+            color: #dc2626;
+        }
+
+        .expand-icon {
+            transition: transform 0.3s;
+            display: inline-block;
+            margin-left: 10px;
+        }
+
+        .expand-icon.expanded {
+            transform: rotate(90deg);
+        }
+
+        /* Bank Cards */
+        .bank-cards-container {
+            display: block;
+            margin-bottom: 15px;
+            overflow-x: auto;
+            overflow-y: hidden;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+            padding: 5px 0;
+        }
+
+        .bank-cards-container::-webkit-scrollbar {
+            display: none;
+        }
+
+        .bank-cards-scroll {
+            display: flex;
+            gap: 12px;
+            width: fit-content;
+        }
+
+        .bank-card {
+            flex-shrink: 0;
+            width: 80px;
+            height: 80px;
+            background: #f8f9fa;
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 1.5px solid #e5e7eb;
+            padding: 8px;
+        }
+
+        .bank-card:hover {
+            background: #f3f4f6;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .bank-status-dot {
+            position: absolute;
+            top: 6px;
+            right: 6px;
+            width: 8px;
+            height: 8px;
+            background: #10b981;
+            border-radius: 50%;
+            border: 2px solid #f8f9fa;
+        }
+
+        .bank-icon {
+            font-size: 24px;
+            margin-bottom: 4px;
+        }
+
+        .bank-mask {
+            font-size: 11px;
+            color: #666;
+            font-family: 'Satoshi', sans-serif;
+            font-weight: 500;
+        }
+
+        /* Bottom Navigation */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            border-top: 1px solid #e5e7eb;
+            display: flex;
+            padding: 8px 0;
+            padding-bottom: calc(8px + env(safe-area-inset-bottom));
+            box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+            z-index: 1000;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .nav-item {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            padding: 8px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            color: #666;
+            font-family: 'Satoshi', sans-serif;
+            font-size: 11px;
+            font-weight: 500;
+        }
+
+        .nav-item.active {
+            color: #121619;
+        }
+
+        .nav-item svg {
+            width: 20px;
+            height: 20px;
+            stroke-width: 2;
+        }
+
+        .content-section {
+            display: none;
+        }
+
+        .content-section.active {
+            display: block;
+        }
+
+        /* Bottom Sheet */
+        .bottom-sheet-backdrop {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 9998;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        .bottom-sheet-backdrop.active {
+            display: block;
+        }
+
+        .bottom-sheet {
+            display: none;
+            position: fixed;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100%;
+            max-width: 568px; /* Match container width! */
+            background: white;
+            border-radius: 20px 20px 0 0;
+            z-index: 9999;
+            max-height: 80vh;
+            overflow-y: auto;
+            animation: slideUp 0.3s ease-out;
+            box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .bottom-sheet.active {
+            display: block;
+        }
+
+        .bottom-sheet-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 20px 15px;
+            border-bottom: 1px solid #f0f1f3;
+        }
+
+        .bottom-sheet-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #121619;
+            font-family: 'Satoshi', sans-serif;
+        }
+
+        .bottom-sheet-close {
+            background: none;
+            border: none;
+            font-size: 24px;
+            color: #666;
+            cursor: pointer;
+            padding: 0;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+            transition: all 0.2s;
+        }
+
+        .bottom-sheet-close:hover {
+            background: #f3f4f6;
+            color: #121619;
+        }
+
+        .bottom-sheet-content {
+            padding: 20px;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+@keyframes slideUp {
+    from { 
+        transform: translateX(-50%) translateY(100%); 
+    }
+    to { 
+        transform: translateX(-50%) translateY(0); 
+    }
+}
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #121619;
+            color: white;
+            padding: 15px 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(18, 22, 25, 0.3);
+            z-index: 10000;
+            animation: slideIn 0.3s;
+            font-family: 'Satoshi', sans-serif;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="app-header">
+            <div class="app-title">
+                <h1>SpendTracker</h1>
+                <p class="app-tagline">Your spending, simplified</p>
+            </div>
+            <button class="header-settings-btn" id="settingsBtn">
+                ⚙️
+            </button>
+        </div>
+
+        <!-- Transactions Section -->
+        <div id="transactionsSection" class="content-section active">
+            <div class="header">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-label">Today</div>
+                        <div class="stat-value" id="todaySpend">£0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">This Week</div>
+                        <div class="stat-value" id="weekSpend">£0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">This Month</div>
+                        <div class="stat-value" id="monthSpend">£0</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bank Cards -->
+            <div class="upload-section">
+                <h3 style="font-size: 16px; font-weight: 600; margin-bottom: 12px; color: #121619;">Connected Banks</h3>
+                <div class="bank-cards-container">
+                    <div class="bank-cards-scroll" id="bankCardsScroll">
+                        <!-- Banks will be inserted here by JavaScript -->
+                    </div>
+                </div>
+            </div>
+
+            <div class="tabs">
+                <button class="tab active" id="dailyTab">Daily</button>
+                <button class="tab" id="weeklyTab">Weekly</button>
+                <button class="tab" id="monthlyTab">Monthly</button>
+            </div>
+
+            <div class="transactions-list">
+                <!-- ADD THIS: View Toggle -->
+                <div class="view-toggle" id="viewToggle">
+                    <button class="view-btn active" id="groupedViewBtn">Grouped</button>
+                    <button class="view-btn" id="listViewBtn">List</button>
+                </div>
+                
+                <div id="transactionsList">
+                    <!-- Transactions will be inserted here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Debt Section -->
+        <div id="debtSection" class="content-section">
+            <div class="header">
+                <div style="text-align: center;">
+                    <div style="color: #666; font-size: 14px; margin-bottom: 8px;">Total Debt</div>
+                    <div style="color: #121619; font-size: 32px; font-weight: 900;" id="totalDebtAmount">£0.00</div>
+                    <div style="color: #666; font-size: 13px; margin-top: 4px;" id="debtAccountsCount">0 accounts</div>
+                </div>
+            </div>
+
+            <div id="debtAccountsList">
+                <!-- Debt optimization UI will be inserted here -->
+            </div>
+        </div>
+
+        <!-- Bottom Navigation -->
+        <nav class="bottom-nav">
+            <button class="nav-item active" id="navTransactions">
+                <i data-feather="credit-card"></i>
+                <span>Transactions</span>
+            </button>
+            <button class="nav-item" id="navDebt">
+                <i data-feather="trending-down"></i>
+                <span>Debt</span>
+            </button>
+        </nav>
+    </div>
+
+    <!-- Bottom Sheet for Bank Details -->
+    <div class="bottom-sheet-backdrop" id="bottomSheetBackdrop"></div>
+    <div class="bottom-sheet" id="bottomSheet">
+        <div class="bottom-sheet-header">
+            <div class="bottom-sheet-title" id="bottomSheetTitle">Bank Details</div>
+            <button class="bottom-sheet-close" id="bottomSheetClose">×</button>
+        </div>
+        <div class="bottom-sheet-content" id="bottomSheetContent">
+            <!-- Content will be inserted dynamically -->
+        </div>
+    </div>
+
+    <!-- PASTE PART 2 HERE: JavaScript with pre-loaded data -->
+    <script>
+       // ===== APP STATE =====
+const app = {
+    transactions: [],
+    debts: [],
+    banks: [],
+    settings: {
+        currency: '£'
+    },
+    currentView: 'daily',
+     displayMode: 'grouped', // 'grouped' or 'list'
+    optimizationState: {
+        spendingAnalysis: null,
+        selectedStrategy: 'avalanche',
+        monthlySurplus: 200,
+        debtCalculations: {},
+        expandedDebtId: null
+    }
+};
+
+// ===== CATEGORY DEFINITIONS =====
+const categories = {
+    groceries: { name: 'Groceries', icon: '🛒' },
+    dining: { name: 'Dining & Restaurants', icon: '🍽️' },
+    transport: { name: 'Transport', icon: '🚗' },
+    shopping: { name: 'Shopping', icon: '🛍️' },
+    entertainment: { name: 'Entertainment', icon: '🎬' },
+    bills: { name: 'Bills & Utilities', icon: '💡' },
+    health: { name: 'Health & Medical', icon: '⚕️' },
+    other: { name: 'Other', icon: '📦' }
+};
+
+// ===== PRE-LOADED BANKS =====
+app.banks = [
+    {
+        id: 'bank_1',
+        name: 'Chase',
+        mask: '1234',
+        icon: '🏦',
+        lastSync: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString() // 2 hours ago
+    },
+    {
+        id: 'bank_2',
+        name: 'Barclays',
+        mask: '5678',
+        icon: '🏦',
+        lastSync: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString()
+    },
+    {
+        id: 'bank_3',
+        name: 'HSBC',
+        mask: '9012',
+        icon: '🏦',
+        lastSync: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString()
+    },
+    {
+        id: 'bank_4',
+        name: 'Natwest',
+        mask: '3456',
+        icon: '🏦',
+        lastSync: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString()
+    }
+];
+
+// ===== PRE-LOADED DEBTS =====
+app.debts = [
+    {
+        id: 'debt_1',
+        name: 'Barclays Mortgage',
+        type: 'Mortgage',
+        balance: 180000,
+        apr: 3.5,
+        minPayment: 850
+    },
+    {
+        id: 'debt_2',
+        name: 'Car Finance',
+        type: 'Auto Loan',
+        balance: 4500,  // Changed: NOW SMALLEST balance
+        apr: 6.9,  // Changed: NOW LOWEST non-mortgage APR
+        minPayment: 180
+    },
+    {
+        id: 'debt_3',
+        name: 'Barclays Personal Loan',
+        type: 'Unsecured Loan',
+        balance: 12000,  // Middle balance
+        apr: 21.9,  // Changed: NOW HIGHEST APR!
+        minPayment: 300
+    },
+    {
+        id: 'debt_4',
+        name: 'Barclaycard',
+        type: 'Credit Card',
+        balance: 15600,  // Changed: NOW 2nd LARGEST balance
+        apr: 18.9,  // Changed: 2nd highest APR
+        minPayment: 325
+    }
+];
+
+// ===== PRE-LOADED TRANSACTIONS (3 MONTHS: AUG-NOV 2025) =====
+function generateTransactions() {
+    const transactions = [];
+    const now = new Date(); // Use actual current date
+    const startDate = new Date(now.getFullYear(), now.getMonth() - 3, 1); // 3 months ago from today
+    
+    // Transaction templates by category
+    const transactionTemplates = {
+        groceries: [
+            { merchant: 'Tesco', amounts: [45, 67, 89, 123, 156] },
+            { merchant: 'Sainsbury\'s', amounts: [52, 78, 94, 112] },
+            { merchant: 'Asda', amounts: [38, 61, 85, 103] },
+            { merchant: 'Morrisons', amounts: [41, 59, 73, 98] },
+            { merchant: 'Aldi', amounts: [28, 35, 49, 62] },
+            { merchant: 'Lidl', amounts: [25, 33, 44, 58] },
+            { merchant: 'Waitrose', amounts: [62, 85, 112, 134] }
+        ],
+        dining: [
+            { merchant: 'Starbucks', amounts: [4.50, 6.80, 8.20, 12.50] },
+            { merchant: 'Nando\'s', amounts: [18, 24, 32, 45] },
+            { merchant: 'Pizza Express', amounts: [28, 35, 42, 55] },
+            { merchant: 'Pret A Manger', amounts: [6.50, 8.90, 11.20] },
+            { merchant: 'Wagamama', amounts: [32, 45, 58, 72] },
+            { merchant: 'Costa Coffee', amounts: [3.80, 5.50, 7.20] },
+            { merchant: 'McDonald\'s', amounts: [7.50, 12.80, 18.90] },
+            { merchant: 'Greggs', amounts: [4.20, 6.50, 8.90] },
+            { merchant: 'Leon', amounts: [8.50, 12.30, 15.80] }
+        ],
+        transport: [
+            { merchant: 'Uber', amounts: [8, 12, 18, 25, 35] },
+            { merchant: 'Shell Petrol', amounts: [45, 52, 68, 75] },
+            { merchant: 'BP Petrol', amounts: [48, 55, 70, 78] },
+            { merchant: 'TfL Transport', amounts: [15, 22, 35, 48] },
+            { merchant: 'Trainline', amounts: [25, 48, 72, 95] },
+            { merchant: 'National Rail', amounts: [32, 56, 84, 112] }
+        ],
+        shopping: [
+            { merchant: 'Amazon', amounts: [18, 29, 45, 67, 89, 125] },
+            { merchant: 'Zara', amounts: [35, 58, 89, 124] },
+            { merchant: 'H&M', amounts: [22, 38, 54, 78] },
+            { merchant: 'Boots', amounts: [12, 18, 28, 45] },
+            { merchant: 'Argos', amounts: [35, 68, 95, 145] },
+            { merchant: 'Next', amounts: [42, 68, 95, 132] },
+            { merchant: 'John Lewis', amounts: [68, 112, 178, 245] }
+        ],
+        entertainment: [
+            { merchant: 'Netflix', amounts: [10.99] },
+            { merchant: 'Spotify', amounts: [10.99] },
+            { merchant: 'Amazon Prime', amounts: [8.99] },
+            { merchant: 'Odeon Cinema', amounts: [12, 18, 24, 32] },
+            { merchant: 'Vue Cinema', amounts: [11, 16, 22, 28] },
+            { merchant: 'Sky', amounts: [45, 65, 89] }
+        ],
+        bills: [
+            { merchant: 'EE Mobile', amounts: [35, 45, 55] },
+            { merchant: 'British Gas', amounts: [85, 125, 165] },
+            { merchant: 'Thames Water', amounts: [42, 48, 55] },
+            { merchant: 'Virgin Media', amounts: [45, 58, 72] },
+            { merchant: 'Council Tax', amounts: [145, 165, 185] }
+        ],
+        health: [
+            { merchant: 'Pure Gym', amounts: [29.99] },
+            { merchant: 'Boots Pharmacy', amounts: [8, 12, 18, 25] },
+            { merchant: 'Superdrug', amounts: [6, 11, 16, 22] },
+            { merchant: 'Holland & Barrett', amounts: [15, 22, 35, 48] }
+        ]
+    };
+
+    const bankIds = ['bank_1', 'bank_2', 'bank_3', 'bank_4'];
+    let id = 1;
+
+    // Generate transactions for each day over 3 months
+    for (let d = new Date(startDate); d <= now; d.setDate(d.getDate() + 1)) {
+        const dayOfWeek = d.getDay();
+        const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
+        
+        // More transactions on weekends
+        const numTransactions = isWeekend ? Math.floor(Math.random() * 5) + 3 : Math.floor(Math.random() * 4) + 1;
+        
+        for (let i = 0; i < numTransactions; i++) {
+            // Random category (groceries and dining more frequent)
+            const categoryWeights = {
+                groceries: 25,
+                dining: 25,
+                transport: 15,
+                shopping: 15,
+                entertainment: 8,
+                bills: 5,
+                health: 7
+            };
+            
+            const categoryKeys = Object.keys(categoryWeights);
+            const totalWeight = Object.values(categoryWeights).reduce((a, b) => a + b, 0);
+            let random = Math.random() * totalWeight;
+            let selectedCategory = 'groceries';
+            
+            for (const cat of categoryKeys) {
+                random -= categoryWeights[cat];
+                if (random <= 0) {
+                    selectedCategory = cat;
+                    break;
+                }
+            }
+            
+            // Pick random merchant from category
+            const merchantsList = transactionTemplates[selectedCategory];
+            const merchantTemplate = merchantsList[Math.floor(Math.random() * merchantsList.length)];
+            const amount = merchantTemplate.amounts[Math.floor(Math.random() * merchantTemplate.amounts.length)];
+            
+            // Random bank
+            const bankId = bankIds[Math.floor(Math.random() * bankIds.length)];
+            const bank = app.banks.find(b => b.id === bankId);
+            
+            transactions.push({
+                id: id++,
+                merchant: merchantTemplate.merchant,
+                amount: amount,
+                date: new Date(d).toISOString(),
+                category: selectedCategory,
+                source: bank.name
+            });
+        }
+    }
+    
+    return transactions;
+}
+
+// Generate and load transactions
+app.transactions = generateTransactions();
+console.log(`✅ Loaded ${app.transactions.length} transactions`);
+
+// ===== HELPER FUNCTIONS =====
+
+function showNotification(message) {
+    const notification = document.createElement('div');
+    notification.className = 'notification';
+    notification.textContent = message;
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        notification.remove();
+    }, 3000);
+}
+
+function formatLastSync(lastSyncDate) {
+    if (!lastSyncDate) return 'Never';
+    
+    try {
+        const now = new Date();
+        const sync = new Date(lastSyncDate);
+        const diffMs = now - sync;
+        const diffMins = Math.floor(diffMs / 60000);
+        const diffHours = Math.floor(diffMins / 60);
+        
+        if (diffMins < 1) return 'Just now';
+        if (diffMins === 1) return '1 minute ago';
+        if (diffMins < 60) return `${diffMins} minutes ago`;
+        if (diffHours === 1) return '1 hour ago';
+        if (diffHours < 24) return `${diffHours} hours ago`;
+        
+        return sync.toLocaleDateString();
+    } catch (error) {
+        return 'Unknown';
+    }
+}
+
+// ===== RENDER BANKS =====
+function renderBankCards() {
+    const container = document.getElementById('bankCardsScroll');
+    container.innerHTML = '';
+    
+    app.banks.forEach(bank => {
+        const card = document.createElement('div');
+        card.className = 'bank-card';
+        card.innerHTML = `
+            <div class="bank-status-dot"></div>
+            <div class="bank-icon">${bank.icon}</div>
+            <div class="bank-mask">••${bank.mask}</div>
+        `;
+        
+        card.addEventListener('click', () => openBankDetails(bank));
+        container.appendChild(card);
+    });
+}
+
+function openBankDetails(bank) {
+    const backdrop = document.getElementById('bottomSheetBackdrop');
+    const sheet = document.getElementById('bottomSheet');
+    const title = document.getElementById('bottomSheetTitle');
+    const content = document.getElementById('bottomSheetContent');
+    
+    title.textContent = bank.name;
+    content.innerHTML = `
+        <div style="padding: 20px; text-align: center;">
+            <div style="font-size: 48px; margin-bottom: 16px;">${bank.icon}</div>
+            <h3 style="font-size: 20px; font-weight: 700; margin-bottom: 8px;">${bank.name}</h3>
+            <p style="color: #666; font-size: 14px;">Account: ••••${bank.mask}</p>
+            <p style="color: #999; font-size: 12px; margin-top: 8px;">Last synced: ${formatLastSync(bank.lastSync)}</p>
+            <div style="margin-top: 24px; padding: 16px; background: #f8f9fa; border-radius: 12px;">
+                <p style="font-size: 14px; color: #666;">This is a demo bank connection for usability testing.</p>
+            </div>
+        </div>
+    `;
+    
+    backdrop.classList.add('active');
+    sheet.classList.add('active');
+}
+
+function closeBottomSheet() {
+    document.getElementById('bottomSheetBackdrop').classList.remove('active');
+    document.getElementById('bottomSheet').classList.remove('active');
+}
+
+// ===== UPDATE STATS =====
+function updateStats() {
+    const now = new Date();
+    const today = now.toDateString();
+    const weekStart = new Date(now.getFullYear(), now.getMonth(), now.getDate() - now.getDay());
+    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+    
+    let todayTotal = 0;
+    let weekTotal = 0;
+    let monthTotal = 0;
+    
+    app.transactions.forEach(t => {
+        const tDate = new Date(t.date);
+        const amount = parseFloat(t.amount);
+        
+        if (tDate.toDateString() === today) {
+            todayTotal += amount;
+        }
+        if (tDate >= weekStart) {
+            weekTotal += amount;
+        }
+        if (tDate >= monthStart) {
+            monthTotal += amount;
+        }
+    });
+    
+    document.getElementById('todaySpend').textContent = `${app.settings.currency}${todayTotal.toFixed(2)}`;
+    document.getElementById('weekSpend').textContent = `${app.settings.currency}${weekTotal.toFixed(2)}`;
+    document.getElementById('monthSpend').textContent = `${app.settings.currency}${monthTotal.toFixed(2)}`;
+}
+
+// ===== DISPLAY TRANSACTIONS =====
+// ===== DISPLAY TRANSACTIONS =====
+function displayTransactions() {
+    const now = new Date();
+    const container = document.getElementById('transactionsList');
+    
+    // Filter transactions based on current view
+    let filteredTransactions = [];
+    
+    if (app.currentView === 'daily') {
+        const today = now.toDateString();
+        filteredTransactions = app.transactions.filter(t => 
+            new Date(t.date).toDateString() === today
+        );
+    } else if (app.currentView === 'weekly') {
+        const weekStart = new Date(now.getFullYear(), now.getMonth(), now.getDate() - now.getDay());
+        filteredTransactions = app.transactions.filter(t => 
+            new Date(t.date) >= weekStart
+        );
+    } else if (app.currentView === 'monthly') {
+        const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+        filteredTransactions = app.transactions.filter(t => 
+            new Date(t.date) >= monthStart
+        );
+    }
+    
+    if (filteredTransactions.length === 0) {
+        container.innerHTML = `
+            <div style="text-align: center; padding: 40px; color: #999;">
+                <div style="font-size: 64px; margin-bottom: 10px;">📝</div>
+                <p>No transactions for this period</p>
+            </div>
+        `;
+        return;
+    }
+    
+    if (app.displayMode === 'grouped') {
+        // Group by category
+        const grouped = {};
+        filteredTransactions.forEach(t => {
+            const category = t.category || 'other';
+            if (!grouped[category]) {
+                grouped[category] = {
+                    transactions: [],
+                    total: 0
+                };
+            }
+            grouped[category].transactions.push(t);
+            grouped[category].total += parseFloat(t.amount);
+        });
+        
+        // Sort by total
+        const sortedCategories = Object.entries(grouped).sort((a, b) => b[1].total - a[1].total);
+        
+       container.innerHTML = sortedCategories.map(([categoryKey, data]) => {
+    const category = categories[categoryKey];
+    return `
+        <div class="category-group">
+            <div class="category-header" onclick="toggleCategory('${categoryKey}')">
+                <div class="category-info">
+                    <span class="category-icon">${category.icon}</span>
+                    <span class="category-name">${category.name}</span>
+                    <span style="color: #666; font-size: 14px;">(${data.transactions.length})</span>
+                    <span class="expand-icon" id="expand-${categoryKey}">▶</span>
+                </div>
+                <div class="category-total">-${app.settings.currency}${data.total.toFixed(2)}</div>
+            </div>
+            <div class="category-items" id="category-${categoryKey}">
+                ${data.transactions.map(t => `
+                    <div class="transaction-item">
+                        <div>
+                            <div class="transaction-merchant">${t.merchant}</div>
+                            <div class="transaction-date">${new Date(t.date).toLocaleDateString()} • ${t.source}</div>
+                        </div>
+                        <div class="transaction-amount">-${app.settings.currency}${parseFloat(t.amount).toFixed(2)}</div>
+                    </div>
+                `).join('')}
+            </div>
+        </div>
+    `;
+}).join('');
+} else {
+    // List view - flat list of all transactions
+    container.innerHTML = filteredTransactions
+        .sort((a, b) => new Date(b.date) - new Date(a.date))
+        .map(t => {
+            const category = categories[t.category || 'other'];
+            return `
+                <div style="display: flex; align-items: center; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #f3f4f6; gap: 12px;">
+                    <div style="display: flex; align-items: center; gap: 12px; flex: 1; min-width: 0;">
+                        <span style="font-size: 24px; flex-shrink: 0;">${category.icon}</span>
+                        <div style="flex: 1; min-width: 0;">
+                            <div class="transaction-merchant">${t.merchant}</div>
+                            <div class="transaction-date">${new Date(t.date).toLocaleDateString()} • ${t.source}</div>
+                        </div>
+                    </div>
+                    <div class="transaction-amount" style="flex-shrink: 0; white-space: nowrap;">-${app.settings.currency}${parseFloat(t.amount).toFixed(2)}</div>
+                </div>
+            `;
+        }).join('');
+}
+}
+
+function toggleCategory(categoryKey) {
+    const itemsDiv = document.getElementById(`category-${categoryKey}`);
+    const expandIcon = document.getElementById(`expand-${categoryKey}`);
+    
+    if (itemsDiv.classList.contains('expanded')) {
+        itemsDiv.classList.remove('expanded');
+        expandIcon.classList.remove('expanded');
+    } else {
+        itemsDiv.classList.add('expanded');
+        expandIcon.classList.add('expanded');
+    }
+}
+
+window.toggleCategory = toggleCategory;
+
+// ===== INITIALIZATION =====
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('🚀 SpendTracker Usability Test Demo');
+    
+    // Render banks
+    renderBankCards();
+    
+    // Update stats
+    updateStats();
+    
+    // Display transactions
+    displayTransactions();
+
+     // ADD THIS: Set initial display mode button state
+    if (app.displayMode === 'list') {
+        document.getElementById('listViewBtn').classList.add('active');
+        document.getElementById('groupedViewBtn').classList.remove('active');
+    }
+    
+    // Initialize Feather icons
+    if (typeof feather !== 'undefined') {
+        feather.replace();
+    }
+    
+    // Tab switching
+    document.getElementById('dailyTab').addEventListener('click', () => {
+        app.currentView = 'daily';
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        document.getElementById('dailyTab').classList.add('active');
+        displayTransactions();
+    });
+    
+    document.getElementById('weeklyTab').addEventListener('click', () => {
+        app.currentView = 'weekly';
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        document.getElementById('weeklyTab').classList.add('active');
+        displayTransactions();
+    });
+    
+    document.getElementById('monthlyTab').addEventListener('click', () => {
+        app.currentView = 'monthly';
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        document.getElementById('monthlyTab').classList.add('active');
+        displayTransactions();
+    });
+    
+    // Bottom navigation
+    document.getElementById('navTransactions').addEventListener('click', () => {
+        document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+        document.getElementById('navTransactions').classList.add('active');
+        document.getElementById('transactionsSection').classList.add('active');
+        document.getElementById('debtSection').classList.remove('active');
+    });
+    
+    document.getElementById('navDebt').addEventListener('click', () => {
+        document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+        document.getElementById('navDebt').classList.add('active');
+        document.getElementById('debtSection').classList.add('active');
+        document.getElementById('transactionsSection').classList.remove('active');
+        loadDebtOptimization();
+    });
+    
+    // Close bottom sheet
+    document.getElementById('bottomSheetClose').addEventListener('click', closeBottomSheet);
+    document.getElementById('bottomSheetBackdrop').addEventListener('click', closeBottomSheet);
+
+    // View toggle handlers
+document.getElementById('groupedViewBtn').addEventListener('click', () => {
+    app.displayMode = 'grouped';
+    document.querySelectorAll('.view-btn').forEach(btn => btn.classList.remove('active'));
+    document.getElementById('groupedViewBtn').classList.add('active');
+    displayTransactions();
+});
+
+document.getElementById('listViewBtn').addEventListener('click', () => {
+    app.displayMode = 'list';
+    document.querySelectorAll('.view-btn').forEach(btn => btn.classList.remove('active'));
+    document.getElementById('listViewBtn').classList.add('active');
+    displayTransactions();
+});
+    
+});
+// ===== SPENDING ANALYSIS (CLIENT-SIDE) =====
+function analyzeSpending(transactions, totalDebt) {
+    const now = new Date();
+    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+    
+    // Get this month's spending
+    const thisMonthTransactions = transactions.filter(t => new Date(t.date) >= monthStart);
+    
+    // Calculate spending by category
+    const categorySpending = {};
+    thisMonthTransactions.forEach(t => {
+        const cat = t.category || 'other';
+        categorySpending[cat] = (categorySpending[cat] || 0) + parseFloat(t.amount);
+    });
+    
+    // Calculate total monthly spending
+    const totalSpending = Object.values(categorySpending).reduce((sum, val) => sum + val, 0);
+    
+    // Generate insights
+    const insights = [];
+    
+    if (totalSpending > 2000) {
+        insights.push(`You've spent ${app.settings.currency}${totalSpending.toFixed(0)} this month - that's quite high for the average UK household.`);
+    } else if (totalSpending > 1500) {
+        insights.push(`Your monthly spending of ${app.settings.currency}${totalSpending.toFixed(0)} is moderate but there's room for optimization.`);
+    } else {
+        insights.push(`You're doing well! Spending ${app.settings.currency}${totalSpending.toFixed(0)} this month is reasonable.`);
+    }
+    
+    // Find highest spending category
+    const sortedCategories = Object.entries(categorySpending).sort((a, b) => b[1] - a[1]);
+    if (sortedCategories.length > 0) {
+        const topCategory = sortedCategories[0];
+        const categoryName = categories[topCategory[0]]?.name || 'Unknown';
+        insights.push(`Your biggest expense is ${categoryName} at ${app.settings.currency}${topCategory[1].toFixed(0)}.`);
+    }
+    
+    // Debt-to-income insight
+    if (totalDebt > totalSpending * 12) {
+        insights.push(`With ${app.settings.currency}${totalDebt.toLocaleString()} in debt, focusing on high-interest debts first will save you the most.`);
+    }
+    
+    // Calculate recommended surplus (10-15% of monthly spending)
+    const recommendedSurplus = Math.round(totalSpending * 0.12);
+    
+    return {
+        insights: insights,
+        opportunities: [], // Could add specific opportunities later
+        recommendedSurplus: Math.max(100, Math.min(recommendedSurplus, 500)), // Between £100-£500
+        reasoning: `Based on your ${app.settings.currency}${totalSpending.toFixed(0)} monthly spending, this amount is realistic and sustainable.`
+    };
+}
+
+// ===== SURPLUS DETECTION (CLIENT-SIDE) =====
+function detectSurplus(transactions) {
+    const now = new Date();
+    const currentDay = now.getDate();
+    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+    
+    // Get last 3 months for averaging (excluding current month)
+    const threeMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 3, 1);
+    const lastMonthEnd = new Date(now.getFullYear(), now.getMonth(), 0);
+    
+    const historicalTransactions = transactions.filter(t => {
+        const tDate = new Date(t.date);
+        return tDate >= threeMonthsAgo && tDate <= lastMonthEnd;
+    });
+    
+    // Calculate average spending per category per day
+    const categoryAverages = {};
+    const monthsCounted = 3;
+    
+    historicalTransactions.forEach(t => {
+        const cat = t.category || 'other';
+        categoryAverages[cat] = (categoryAverages[cat] || 0) + parseFloat(t.amount);
+    });
+    
+    // Get current month spending
+    const currentMonthTransactions = transactions.filter(t => new Date(t.date) >= monthStart);
+    const currentCategorySpending = {};
+    
+    currentMonthTransactions.forEach(t => {
+        const cat = t.category || 'other';
+        currentCategorySpending[cat] = (currentCategorySpending[cat] || 0) + parseFloat(t.amount);
+    });
+    
+    // Calculate expected spending by this day
+    const opportunities = [];
+    let totalSurplus = 0;
+    
+    Object.entries(categoryAverages).forEach(([cat, totalHistorical]) => {
+        const avgMonthly = totalHistorical / monthsCounted;
+        const avgDaily = avgMonthly / 30; // Approximate
+        const expectedByNow = avgDaily * currentDay;
+        const actualSpent = currentCategorySpending[cat] || 0;
+        
+        if (actualSpent < expectedByNow * 0.85) { // 15% under budget
+            const surplus = Math.round(expectedByNow - actualSpent);
+            if (surplus > 20) { // Only show if >£20 surplus
+                opportunities.push({
+                    category: categories[cat]?.name || 'Unknown',
+                    expectedNow: Math.round(expectedByNow),
+                    actualSpent: Math.round(actualSpent),
+                    surplus: surplus
+                });
+                totalSurplus += surplus;
+            }
+        }
+    });
+    
+    if (totalSurplus < 50) {
+        return null; // Not enough surplus to show
+    }
+    
+    return {
+        totalSurplus: Math.round(totalSurplus),
+        daysIntoMonth: currentDay,
+        opportunities: opportunities.sort((a, b) => b.surplus - a.surplus).slice(0, 3), // Top 3
+        message: `You're tracking under budget in ${opportunities.length} categories!`
+    };
+}
+
+// ===== DEBT CALCULATION (CLIENT-SIDE) =====
+function calculateDebt(debt, monthlySurplus) {
+    const balance = parseFloat(debt.balance);
+    const apr = parseFloat(debt.apr);
+    const minPayment = parseFloat(debt.minPayment);
+    const monthlyRate = (apr / 100) / 12;
+    const monthlyInterest = balance * monthlyRate;
+    
+    // Check if debt is unpayable (minimum payment doesn't cover interest)
+    const isUnpayable = minPayment <= monthlyInterest;
+    
+    // Calculate minimum payment only scenario
+    let minOnlyMonths = 0;
+    let minOnlyTotalInterest = 0;
+    let minOnlyBalance = balance;
+    
+    if (isUnpayable) {
+        minOnlyMonths = 9999; // Effectively never
+        minOnlyTotalInterest = 0;
+    } else {
+        while (minOnlyBalance > 0 && minOnlyMonths < 600) { // Cap at 50 years
+            const interest = minOnlyBalance * monthlyRate;
+            const principal = minPayment - interest;
+            minOnlyBalance -= principal;
+            minOnlyTotalInterest += interest;
+            minOnlyMonths++;
+        }
+        if (minOnlyBalance > 0) {
+            minOnlyMonths = 9999; // Still unpayable
+        }
+    }
+    
+    // Calculate with extra payment (one-time)
+    let extraBalance = balance - monthlySurplus;
+    let extraMonths = 0;
+    let extraTotalInterest = 0;
+    
+    const stillUnpayable = minPayment <= (extraBalance * monthlyRate);
+    
+    if (stillUnpayable && extraBalance > 0) {
+        extraMonths = 9999;
+        extraTotalInterest = 0;
+    } else {
+        while (extraBalance > 0 && extraMonths < 600) {
+            const interest = extraBalance * monthlyRate;
+            const principal = minPayment - interest;
+            extraBalance -= principal;
+            extraTotalInterest += interest;
+            extraMonths++;
+        }
+    }
+    
+    // Calculate savings
+    const interestSaved = Math.max(0, minOnlyTotalInterest - extraTotalInterest);
+    const monthsSaved = Math.max(0, minOnlyMonths - extraMonths);
+    const yearsSaved = (monthsSaved / 12).toFixed(1);
+    
+    // Calculate suggestion if still unpayable
+    let suggestion = null;
+    if (stillUnpayable) {
+        const minimumNeeded = Math.ceil((extraBalance * monthlyRate) + 10); // Minimum to start reducing
+        const suggestedPayment = Math.ceil(minimumNeeded * 1.5); // 50% more for meaningful progress
+        
+        // Calculate with suggested payment
+        let sugBalance = extraBalance;
+        let sugMonths = 0;
+        let sugInterest = 0;
+        
+        while (sugBalance > 0 && sugMonths < 600) {
+            const interest = sugBalance * monthlyRate;
+            const principal = suggestedPayment - interest;
+            sugBalance -= principal;
+            sugInterest += interest;
+            sugMonths++;
+        }
+        
+        suggestion = {
+            minimumNeeded: minimumNeeded,
+            suggestedPayment: suggestedPayment,
+            months: sugMonths,
+            years: (sugMonths / 12).toFixed(1),
+            interestSaved: Math.max(0, minOnlyTotalInterest - sugInterest)
+        };
+    }
+    
+    return {
+        currentBalance: balance,
+        apr: apr,
+        minPayment: minPayment,
+        monthlyInterest: monthlyInterest.toFixed(2),
+        minimumOnly: {
+            months: minOnlyMonths,
+            years: (minOnlyMonths / 12).toFixed(1),
+            totalInterest: Math.round(minOnlyTotalInterest),
+            totalPaid: Math.round(balance + minOnlyTotalInterest),
+            debtFreeDate: minOnlyMonths < 600 ? new Date(Date.now() + minOnlyMonths * 30 * 24 * 60 * 60 * 1000).toLocaleDateString() : 'Never',
+            isUnpayable: isUnpayable
+        },
+        withExtra: {
+            months: extraMonths,
+            years: (extraMonths / 12).toFixed(1),
+            totalInterest: Math.round(extraTotalInterest),
+            totalPaid: Math.round(balance + extraTotalInterest),
+            debtFreeDate: extraMonths < 600 ? new Date(Date.now() + extraMonths * 30 * 24 * 60 * 60 * 1000).toLocaleDateString() : 'Never',
+            stillUnpayable: stillUnpayable
+        },
+        savings: {
+            interestSaved: Math.round(interestSaved),
+            monthsSaved: monthsSaved,
+            yearsSaved: yearsSaved,
+            hasRealSavings: interestSaved > 0
+        },
+        suggestion: suggestion
+    };
+}
+
+// ===== LOAD DEBT OPTIMIZATION =====
+async function loadDebtOptimization() {
+    const container = document.getElementById('debtAccountsList');
+    
+    // Calculate total debt
+    const totalDebt = app.debts.reduce((sum, d) => sum + d.balance, 0);
+    document.getElementById('totalDebtAmount').textContent = `${app.settings.currency}${totalDebt.toLocaleString('en-GB', { minimumFractionDigits: 2 })}`;
+    document.getElementById('debtAccountsCount').textContent = `${app.debts.length} accounts`;
+    
+    // Show loading
+    container.innerHTML = `
+        <div style="text-align: center; padding: 40px 20px;">
+            <div style="font-size: 48px; margin-bottom: 16px;">💡</div>
+            <div style="color: #666;">Analyzing your spending...</div>
+        </div>
+    `;
+    
+    // Simulate analysis delay
+    setTimeout(() => {
+        // Analyze spending
+        app.optimizationState.spendingAnalysis = analyzeSpending(app.transactions, totalDebt);
+        app.optimizationState.monthlySurplus = app.optimizationState.spendingAnalysis.recommendedSurplus;
+        
+        // Detect surplus
+        const surplusData = detectSurplus(app.transactions);
+        
+        // Calculate all debts
+        app.debts.forEach(debt => {
+            app.optimizationState.debtCalculations[debt.id] = calculateDebt(debt, app.optimizationState.monthlySurplus);
+        });
+        
+        // Render UI
+        renderDebtOptimization(surplusData);
+    }, 800);
+}
+
+// ===== RENDER DEBT OPTIMIZATION =====
+function renderDebtOptimization(surplusData) {
+    const container = document.getElementById('debtAccountsList');
+    const currency = app.settings.currency;
+    const analysis = app.optimizationState.spendingAnalysis;
+    
+    // Sort debts by strategy
+    const sortedDebts = [...app.debts].sort((a, b) => {
+        if (app.optimizationState.selectedStrategy === 'avalanche') {
+            return b.apr - a.apr; // Highest APR first
+        } else {
+            return a.balance - b.balance; // Smallest balance first
+        }
+    });
+    
+    const recommendedDebt = sortedDebts[0];
+    
+    container.innerHTML = `
+        ${surplusData ? renderDynamicSurplus(surplusData, currency) : ''}
+        ${renderSpendingAnalysis(analysis, currency)}
+        ${renderStrategySelector()}
+        <h3 style="font-size: 16px; font-weight: 600; margin-bottom: 12px; color: #121619;">Debts</h3>
+        ${sortedDebts.map(debt => {
+            if (debt.id === recommendedDebt.id) {
+                return renderRecommendedDebt(debt, currency);
+            } else {
+                return renderOtherDebtCard(debt, currency);
+            }
+        }).join('')}
+    `;
+}
+
+// ===== RENDER COMPONENTS =====
+function renderDynamicSurplus(surplusData, currency) {
+    return `
+        <div class="upload-section" style="margin-bottom: 16px; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white;">
+            <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+                <span style="font-size: 32px;">💰</span>
+                <div>
+                    <h3 style="font-size: 18px; font-weight: 700; margin: 0; color: white;">Extra Money Available!</h3>
+                    <div style="font-size: 14px; opacity: 0.9;">Day ${surplusData.daysIntoMonth} of the month</div>
+                </div>
+            </div>
+            
+            <div style="background: rgba(255,255,255,0.2); padding: 16px; border-radius: 12px; margin-bottom: 12px;">
+                <div style="font-size: 32px; font-weight: 900; margin-bottom: 4px;">
+                    ${currency}${surplusData.totalSurplus}
+                </div>
+                <div style="font-size: 14px; opacity: 0.9;">
+                    ${surplusData.message}
+                </div>
+            </div>
+            
+            ${surplusData.opportunities.map(opp => `
+                <div style="background: rgba(255,255,255,0.15); padding: 12px; border-radius: 8px; margin-bottom: 8px;">
+                    <div style="font-weight: 600; margin-bottom: 4px;">${opp.category}</div>
+                    <div style="font-size: 13px; opacity: 0.9;">
+                        Usually ${currency}${opp.expectedNow} by now, spent only ${currency}${opp.actualSpent}
+                    </div>
+                    <div style="font-size: 14px; font-weight: 700; margin-top: 4px;">
+                        ${currency}${opp.surplus} available
+                    </div>
+                </div>
+            `).join('')}
+            
+            <button 
+                onclick="applyDynamicSurplus(${surplusData.totalSurplus})"
+                style="width: 100%; padding: 14px; background: white; color: #10b981; border: none; border-radius: 10px; font-size: 15px; font-weight: 700; cursor: pointer; font-family: 'Satoshi', sans-serif; margin-top: 12px;"
+            >
+                🚀 Use This ${currency}${surplusData.totalSurplus} for Debt Payment
+            </button>
+        </div>
+    `;
+}
+
+function renderSpendingAnalysis(analysis, currency) {
+    return `
+        <div class="upload-section" style="margin-bottom: 16px;">
+            <h3 style="font-size: 18px; font-weight: 700; margin-bottom: 16px; color: #121619;">💡 AI Spending Analysis</h3>
+            
+            ${analysis.insights.map(insight => `
+                <div style="background: #f8f9fa; padding: 12px; border-radius: 8px; margin-bottom: 8px; font-size: 14px; color: #333;">
+                    ${insight}
+                </div>
+            `).join('')}
+            
+            <div style="margin-top: 20px;">
+                <label style="display: block; font-size: 14px; font-weight: 600; margin-bottom: 8px; color: #121619;">
+                    Monthly Surplus: ${currency}${app.optimizationState.monthlySurplus}
+                </label>
+                <input 
+                    type="range" 
+                    min="0" 
+                    max="1000" 
+                    step="10" 
+                    value="${app.optimizationState.monthlySurplus}"
+                    onchange="updateSurplus(this.value)"
+                    oninput="this.previousElementSibling.innerHTML = 'Monthly Surplus: ${currency}' + this.value"
+                    style="width: 100%; height: 8px; border-radius: 4px; background: #e5e7eb; outline: none; -webkit-appearance: none;"
+                />
+                <div style="display: flex; justify-content: space-between; font-size: 12px; color: #999; margin-top: 4px;">
+                    <span>${currency}0</span>
+                    <span>${currency}1000</span>
+                </div>
+                <div style="font-size: 13px; color: #666; margin-top: 8px; font-style: italic;">
+                    ${analysis.reasoning}
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+function renderStrategySelector() {
+    return `
+        <div class="upload-section" style="margin-bottom: 16px;">
+            <h3 style="font-size: 16px; font-weight: 600; margin-bottom: 12px; color: #121619;">Strategy</h3>
+            
+            <div style="display: flex; gap: 0; background: #f3f4f6; padding: 4px; border-radius: 10px; margin-bottom: 12px;">
+                <button 
+                    onclick="switchStrategy('avalanche')"
+                    style="flex: 1; padding: 10px; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s; font-family: 'Satoshi', sans-serif; ${app.optimizationState.selectedStrategy === 'avalanche' ? 'background: #121619; color: white;' : 'background: transparent; color: #666;'}"
+                >
+                    🔥 Avalanche
+                </button>
+                <button 
+                    onclick="switchStrategy('snowball')"
+                    style="flex: 1; padding: 10px; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s; font-family: 'Satoshi', sans-serif; ${app.optimizationState.selectedStrategy === 'snowball' ? 'background: #121619; color: white;' : 'background: transparent; color: #666;'}"
+                >
+                    ⛄ Snowball
+                </button>
+            </div>
+            
+            <div style="background: #f8f9fa; padding: 12px; border-radius: 8px; font-size: 13px; color: #666;">
+                ${app.optimizationState.selectedStrategy === 'avalanche' 
+                    ? '💡 Avalanche saves the most money by paying highest interest debts first'
+                    : '💡 Snowball gives quick wins by paying smallest balances first for motivation'
+                }
+            </div>
+        </div>
+    `;
+}
+
+function renderRecommendedDebt(debt, currency) {
+    const calc = app.optimizationState.debtCalculations[debt.id];
+    const isExpanded = app.optimizationState.expandedDebtId === debt.id;
+    
+    return `
+        <div class="upload-section" style="margin-bottom: 16px; border: 2px solid #10b981;">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
+                <div>
+                    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+                        <span style="font-size: 20px;">⭐</span>
+                        <h3 style="font-size: 16px; font-weight: 600; margin: 0; color: #121619;">${debt.name}</h3>
+                    </div>
+                    <div style="font-size: 13px; color: #666;">${debt.type}</div>
+                    <div style="display: inline-block; background: #10b981; color: white; font-size: 11px; font-weight: 600; padding: 4px 8px; border-radius: 4px; margin-top: 4px;">
+                        RECOMMENDED
+                    </div>
+                </div>
+                <div style="text-align: right;">
+                    <div style="font-size: 11px; color: #666; margin-bottom: 2px;">Balance</div>
+                    <div style="font-size: 20px; font-weight: 700; color: #121619;">${currency}${debt.balance.toLocaleString('en-GB', { minimumFractionDigits: 2 })}</div>
+                </div>
+            </div>
+            
+            ${isExpanded ? renderDebtDetails(debt, calc, currency) : renderDebtSummary(debt, calc, currency)}
+        </div>
+    `;
+}
+
+function renderOtherDebts(debts, currency) {
+    if (debts.length === 0) return '';
+    
+    return `
+        <div style="margin-top: 24px;">
+            <h3 style="font-size: 16px; font-weight: 600; margin-bottom: 12px; color: #121619;">Other Debts</h3>
+            ${debts.map(debt => renderOtherDebtCard(debt, currency)).join('')}
+        </div>
+    `;
+}
+
+function renderOtherDebtCard(debt, currency) {
+    const calc = app.optimizationState.debtCalculations[debt.id];
+    const isExpanded = app.optimizationState.expandedDebtId === debt.id;
+    
+    return `
+        <div class="upload-section" style="margin-bottom: 12px;">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
+                <div>
+                    <h3 style="font-size: 16px; font-weight: 600; margin: 0 0 4px 0; color: #121619;">${debt.name}</h3>
+                    <div style="font-size: 13px; color: #666;">${debt.type}</div>
+                </div>
+                <div style="text-align: right;">
+                    <div style="font-size: 11px; color: #666; margin-bottom: 2px;">Balance</div>
+                    <div style="font-size: 18px; font-weight: 700; color: #121619;">${currency}${debt.balance.toLocaleString('en-GB', { minimumFractionDigits: 2 })}</div>
+                </div>
+            </div>
+            
+            ${isExpanded ? renderDebtDetails(debt, calc, currency) : renderDebtSummary(debt, calc, currency)}
+        </div>
+    `;
+}
+
+function renderDebtSummary(debt, calc, currency) {
+    if (!calc) return '<div style="color: #999;">Calculating...</div>';
+    
+    const isStuckInDebt = calc.minimumOnly?.isUnpayable || calc.minimumOnly?.months >= 600;
+    const hasRealSavings = calc.savings?.hasRealSavings || false;
+    const interestSaved = calc.savings?.interestSaved || 0;
+    
+    return `
+        <div style="padding: 14px; background: #f8f9fa; border-radius: 10px; margin-bottom: 12px;">
+            <div style="font-size: 13px; font-weight: 600; margin-bottom: 10px; color: #121619;">
+                With ONE ${currency}${app.optimizationState.monthlySurplus} payment:
+            </div>
+            <div style="font-size: 13px; color: #666; line-height: 1.8;">
+                ${isStuckInDebt 
+                    ? `• New payoff time: ${calc.withExtra.months} months (${calc.withExtra.years} years)<br>• Interest saved: No saved interest`
+                    : `• New payoff time: ${calc.withExtra.months} months (${calc.withExtra.years} years)<br>• Interest saved: ${hasRealSavings ? currency + interestSaved.toLocaleString() : 'No saved interest'}`
+                }
+            </div>
+        </div>
+        
+        <div style="display: flex; gap: 8px;">
+            <button 
+                onclick="toggleDebtDetails('${debt.id}')"
+                style="flex: 1; padding: 12px; background: white; color: #121619; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; font-family: 'Satoshi', sans-serif;"
+            >
+                📊 View Details
+            </button>
+            <button 
+                onclick="makePayment('${debt.id}')"
+                style="flex: 1; padding: 12px; background: #121619; color: white; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; font-family: 'Satoshi', sans-serif;"
+            >
+                🚀 Make Payment
+            </button>
+        </div>
+    `;
+}
+
+function renderDebtDetails(debt, calc, currency) {
+    const hasRealSavings = calc.savings?.hasRealSavings || false;
+    const interestSaved = calc.savings?.interestSaved || 0;
+    const isUnpayable = calc.minimumOnly?.isUnpayable || false;
+    const stillUnpayable = calc.withExtra?.stillUnpayable || false;
+    
+    return `
+        <div style="background: #f8f9fa; padding: 16px; border-radius: 8px; margin-bottom: 12px;">
+            <div style="margin-bottom: 20px;">
+                <h4 style="font-size: 14px; font-weight: 600; margin-bottom: 12px; color: #121619;">Current Debt</h4>
+                <div style="font-size: 13px; color: #666; line-height: 1.8;">
+                    • Current Balance: ${currency}${calc.currentBalance.toLocaleString('en-GB', { minimumFractionDigits: 2 })}<br>
+                    • APR: ${calc.apr}%<br>
+                    • Monthly Payment: ${currency}${calc.minPayment.toLocaleString('en-GB', { minimumFractionDigits: 2 })}<br>
+                    • Monthly Interest: ${currency}${calc.monthlyInterest}<br>
+                    ${isUnpayable
+                        ? `• Payoff Duration: NEVER<br>• Total Interest: N/A (debt grows forever)`
+                        : `• Payoff Duration: ${calc.minimumOnly.months} months (${calc.minimumOnly.years} years)<br>• Total Interest: ${currency}${calc.minimumOnly.totalInterest.toLocaleString()}`
+                    }
+                </div>
+                
+                ${isUnpayable ? `
+                    <div style="margin-top: 12px; padding: 10px; background: #fef2f2; border-left: 3px solid #dc2626; border-radius: 6px;">
+                        <div style="font-size: 12px; color: #dc2626; font-weight: 600;">
+                            ⚠️ Your minimum payment doesn't cover the interest
+                        </div>
+                    </div>
+                ` : ''}
+            </div>
+
+            <div style="margin-bottom: 16px;">
+                <h4 style="font-size: 14px; font-weight: 600; margin-bottom: 12px; color: #121619;">💰 With ONE ${currency}${app.optimizationState.monthlySurplus} Payment</h4>
+                
+                <div style="font-size: 13px; color: #666; line-height: 1.8;">
+                    • New payoff time: ${calc.withExtra.months} months (${calc.withExtra.years} years)<br>
+                    • Interest saved: ${hasRealSavings ? currency + interestSaved.toLocaleString() : 'No saved interest'}
+                </div>
+
+                ${stillUnpayable && calc.suggestion ? `
+                    <div style="margin-top: 12px; padding: 10px; background: #fffbeb; border-left: 3px solid #f59e0b; border-radius: 6px;">
+                        <div style="font-size: 12px; color: #92400e; line-height: 1.6;">
+                            💡 You need at least ${currency}${calc.suggestion.minimumNeeded}/month to start reducing this debt. 
+                            With ${currency}${calc.suggestion.suggestedPayment}/month, you could pay it off in ${calc.suggestion.years} years 
+                            ${calc.suggestion.interestSaved > 0 ? `and save ${currency}${calc.suggestion.interestSaved.toLocaleString()} in interest` : ''}.
+                        </div>
+                    </div>
+                ` : ''}
+
+                ${!stillUnpayable ? `
+                    <div style="margin-top: 12px; padding: 10px; background: #f0fdf4; border-radius: 6px;">
+                        <div style="font-size: 12px; color: #666;">
+                            💡 Pay ${currency}${app.optimizationState.monthlySurplus} now, then continue ${currency}${calc.minPayment}/month
+                        </div>
+                    </div>
+                ` : ''}
+            </div>
+        </div>
+        
+        <div style="display: flex; gap: 8px;">
+            <button 
+                onclick="toggleDebtDetails('${debt.id}')"
+                style="flex: 1; padding: 12px; background: white; color: #121619; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; font-family: 'Satoshi', sans-serif;"
+            >
+                ← Collapse
+            </button>
+            <button 
+                onclick="makePayment('${debt.id}')"
+                style="flex: 1; padding: 12px; background: #121619; color: white; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; font-family: 'Satoshi', sans-serif;"
+            >
+                🚀 Make Payment
+            </button>
+        </div>
+    `;
+}
+
+// ===== CONTINUE TO PART 4 FOR PAYMENT DEMO =====
+
+// ===== INTERACTIVE HANDLERS =====
+
+window.applyDynamicSurplus = function(amount) {
+    app.optimizationState.monthlySurplus = amount;
+    
+    // Recalculate all debts
+    app.debts.forEach(debt => {
+        app.optimizationState.debtCalculations[debt.id] = calculateDebt(debt, app.optimizationState.monthlySurplus);
+    });
+    
+    // Re-render
+    const surplusData = detectSurplus(app.transactions);
+    renderDebtOptimization(surplusData);
+    
+    showNotification(`💰 Applied ${app.settings.currency}${amount} one-time payment!`);
+};
+
+window.updateSurplus = function(value) {
+    app.optimizationState.monthlySurplus = parseInt(value);
+    
+    // Recalculate all debts
+    app.debts.forEach(debt => {
+        app.optimizationState.debtCalculations[debt.id] = calculateDebt(debt, app.optimizationState.monthlySurplus);
+    });
+    
+    // Re-render
+    const surplusData = detectSurplus(app.transactions);
+    renderDebtOptimization(surplusData);
+};
+
+window.switchStrategy = function(strategy) {
+    app.optimizationState.selectedStrategy = strategy;
+    
+    // Recalculate all debts
+    app.debts.forEach(debt => {
+        app.optimizationState.debtCalculations[debt.id] = calculateDebt(debt, app.optimizationState.monthlySurplus);
+    });
+    
+    // Re-render
+    const surplusData = detectSurplus(app.transactions);
+    renderDebtOptimization(surplusData);
+};
+
+window.toggleDebtDetails = function(debtId) {
+    if (app.optimizationState.expandedDebtId === debtId) {
+        app.optimizationState.expandedDebtId = null;
+    } else {
+        app.optimizationState.expandedDebtId = debtId;
+    }
+    
+    // Re-render
+    const surplusData = detectSurplus(app.transactions);
+    renderDebtOptimization(surplusData);
+};
+
+// ===== PAYMENT DEMO =====
+
+window.makePayment = function(debtId) {
+    const debt = app.debts.find(d => d.id === debtId);
+    if (!debt) return;
+    
+    const paymentAmount = app.optimizationState.monthlySurplus;
+    const calc = app.optimizationState.debtCalculations[debtId];
+    
+    // Calculate savings
+    const interestSaved = calc.savings.hasRealSavings ? calc.savings.interestSaved : 0;
+    const timeSaved = calc.savings.monthsSaved;
+    const termText = timeSaved >= 12 ? `${calc.savings.yearsSaved} years` : `${timeSaved} months`;
+    
+    // Show payment success bottom sheet
+    showPaymentSuccess(debt, paymentAmount, interestSaved, termText);
+};
+
+function showPaymentSuccess(debt, amount, interestSaved, termText) {
+    const currency = app.settings.currency;
+    const backdrop = document.getElementById('bottomSheetBackdrop');
+    const sheet = document.getElementById('bottomSheet');
+    const title = document.getElementById('bottomSheetTitle');
+    const content = document.getElementById('bottomSheetContent');
+    
+    // Calculate new balance
+    const oldBalance = debt.balance;
+    const newBalance = oldBalance - amount;
+    
+    title.textContent = 'Payment Successful!';
+    content.innerHTML = `
+        <div style="padding: 30px 20px; text-align: center;">
+            <div style="font-size: 64px; margin-bottom: 20px;">🎉</div>
+            <h2 style="font-size: 24px; font-weight: 700; margin-bottom: 16px; color: #10b981;">Payment Made!</h2>
+            
+            <div style="background: #f8f9fa; padding: 20px; border-radius: 12px; margin-bottom: 20px;">
+                <div style="font-size: 32px; font-weight: 900; color: #121619; margin-bottom: 8px;">
+                    ${currency}${amount}
+                </div>
+                <div style="font-size: 14px; color: #666; margin-bottom: 16px;">
+                    paid to ${debt.name}
+                </div>
+                <div style="display: flex; justify-content: space-between; padding-top: 16px; border-top: 1px solid #e5e7eb;">
+                    <div>
+                        <div style="font-size: 11px; color: #999; margin-bottom: 4px;">Previous Balance</div>
+                        <div style="font-size: 16px; font-weight: 600; color: #666;">${currency}${oldBalance.toLocaleString('en-GB', { minimumFractionDigits: 2 })}</div>
+                    </div>
+                    <div style="text-align: right;">
+                        <div style="font-size: 11px; color: #999; margin-bottom: 4px;">New Balance</div>
+                        <div style="font-size: 16px; font-weight: 600; color: #10b981;">${currency}${newBalance.toLocaleString('en-GB', { minimumFractionDigits: 2 })}</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; padding: 20px; border-radius: 12px; margin-bottom: 20px;">
+                <div style="font-size: 16px; font-weight: 700; margin-bottom: 12px;">🎊 You've Saved:</div>
+                <div style="font-size: 15px; line-height: 1.8;">
+                    ${interestSaved > 0 ? `💰 ${currency}${interestSaved.toLocaleString()} in interest<br>` : ''}
+                    ⏱️ ${termText} faster payoff
+                </div>
+            </div>
+            
+            <button 
+                onclick="completePayment('${debt.id}', ${amount})"
+                style="width: 100%; padding: 16px; background: #121619; color: white; border: none; border-radius: 10px; font-size: 16px; font-weight: 700; cursor: pointer; font-family: 'Satoshi', sans-serif;"
+            >
+                Done
+            </button>
+        </div>
+    `;
+    
+    backdrop.classList.add('active');
+    sheet.classList.add('active');
+    
+    // Trigger confetti
+    setTimeout(() => {
+        triggerConfetti();
+    }, 300);
+}
+
+function triggerConfetti() {
+    if (typeof confetti === 'undefined') return;
+    
+    // First burst
+    confetti({
+        particleCount: 100,
+        spread: 70,
+        origin: { y: 0.6 }
+    });
+    
+    // Second burst after delay
+    setTimeout(() => {
+        confetti({
+            particleCount: 50,
+            angle: 60,
+            spread: 55,
+            origin: { x: 0 }
+        });
+    }, 200);
+    
+    // Third burst
+    setTimeout(() => {
+        confetti({
+            particleCount: 50,
+            angle: 120,
+            spread: 55,
+            origin: { x: 1 }
+        });
+    }, 400);
+}
+
+window.completePayment = function(debtId, amount) {
+    // Update debt balance
+    const debt = app.debts.find(d => d.id === debtId);
+    if (debt) {
+        debt.balance -= amount;
+        
+        // Recalculate this debt
+        app.optimizationState.debtCalculations[debtId] = calculateDebt(debt, app.optimizationState.monthlySurplus);
+        
+        // Update total debt display
+        const totalDebt = app.debts.reduce((sum, d) => sum + d.balance, 0);
+        document.getElementById('totalDebtAmount').textContent = `${app.settings.currency}${totalDebt.toLocaleString('en-GB', { minimumFractionDigits: 2 })}`;
+    }
+    
+    // Close bottom sheet
+    closeBottomSheet();
+    
+    // Re-render debt optimization
+    setTimeout(() => {
+        const surplusData = detectSurplus(app.transactions);
+        renderDebtOptimization(surplusData);
+        
+        showNotification(`✅ Payment applied! New balance: ${app.settings.currency}${debt.balance.toLocaleString('en-GB', { minimumFractionDigits: 2 })}`);
+    }, 300);
+};
+
+// ===== SETTINGS (MINIMAL) =====
+document.getElementById('settingsBtn').addEventListener('click', function() {
+    const backdrop = document.getElementById('bottomSheetBackdrop');
+    const sheet = document.getElementById('bottomSheet');
+    const title = document.getElementById('bottomSheetTitle');
+    const content = document.getElementById('bottomSheetContent');
+    
+    title.textContent = 'Demo Settings';
+    content.innerHTML = `
+        <div style="padding: 20px; text-align: center;">
+            <div style="font-size: 48px; margin-bottom: 16px;">⚙️</div>
+            <h3 style="font-size: 18px; font-weight: 600; margin-bottom: 12px;">Usability Test Demo</h3>
+            <p style="font-size: 14px; color: #666; line-height: 1.6; margin-bottom: 20px;">
+                This is a demo version with pre-loaded data for usability testing. All data is simulated and stored locally in your browser.
+            </p>
+            <div style="background: #f8f9fa; padding: 16px; border-radius: 12px; text-align: left;">
+                <div style="font-size: 13px; color: #666; line-height: 1.8;">
+                    <strong>Demo includes:</strong><br>
+                    • 3 months of transactions (Aug-Nov 2025)<br>
+                    • 4 connected banks<br>
+                    • 4 debt accounts<br>
+                    • AI spending analysis<br>
+                    • Surplus detection<br>
+                    • Interactive payment demo
+                </div>
+            </div>
+            <button 
+                onclick="closeBottomSheet()"
+                style="width: 100%; padding: 14px; margin-top: 20px; background: #121619; color: white; border: none; border-radius: 10px; font-size: 15px; font-weight: 600; cursor: pointer; font-family: 'Satoshi', sans-serif;"
+            >
+                Close
+            </button>
+        </div>
+    `;
+    
+    backdrop.classList.add('active');
+    sheet.classList.add('active');
+});
+
+// ===== RESET DEMO DATA (OPTIONAL) =====
+window.resetDemo = function() {
+    if (confirm('Reset demo data? This will reload the page with fresh data.')) {
+        location.reload();
+    }
+};
+
+console.log('✅ SpendTracker Usability Test Demo Loaded!');
+console.log(`📊 ${app.transactions.length} transactions loaded`);
+console.log(`💳 ${app.debts.length} debt accounts loaded`);
+console.log(`🏦 ${app.banks.length} banks connected`);
+    </script>
+</body>
+</html>
