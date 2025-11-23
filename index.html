@@ -1125,6 +1125,13 @@ document.addEventListener('DOMContentLoaded', function() {
     // Display transactions
     displayTransactions();
 
+    // ADD THESE LINES: Switch to debt tab by default
+    document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+    document.getElementById('navDebt').classList.add('active');
+    document.getElementById('transactionsSection').classList.remove('active');
+    document.getElementById('debtSection').classList.add('active');
+    loadDebtOptimization();
+
      // ADD THIS: Set initial display mode button state
     if (app.displayMode === 'list') {
         document.getElementById('listViewBtn').classList.add('active');
